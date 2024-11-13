@@ -1,19 +1,14 @@
-# Unicornテスト用サーバー
-
-フロントエンド実装で利用する機能のテストを行うためのリポジトリです。
-Dockerコンテナで機能を分割して利用します。
-
-## CloudMessaging
+# Unicorn Notification Server
 
 Firebase Cloud Messagingを利用して、フロントエンドにプッシュ通知を提供するサーバーです。
 
-### コンテナスペック
+## コンテナスペック
 
 - Node.js v18.20.3
 - TypeScript v5.6.3
 - Express.js v4.21.1
 
-### API仕様 
+## API仕様 
 
 最終更新: 2024/11/13
 
