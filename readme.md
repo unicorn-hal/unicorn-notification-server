@@ -10,9 +10,19 @@ Firebase Cloud Messagingを利用して、フロントエンドにプッシュ�
 
 ## API仕様 
 
-最終更新: 2024/11/13
+最終更新: 2024/11/14
 
-#### [POST] /send
+### 共通Header
+```
+Content-Type:  application/json
+Authorization: Bearer YOUR_ID_TOKEN
+```
+Authorizationに指定するTokenはFirebase認証を通過する必要があります。
+認証を通過していないTokenには`403 Forbidden`を返却します。
+
+---
+
+### [POST] /send
 
 **説明**
 
@@ -37,7 +47,7 @@ body:  <String> 通知本文
 
 ---
 
-#### [POST] /multicast
+### [POST] /multicast
 
 **説明**
 
@@ -62,7 +72,7 @@ body:   <String>   通知本文
 
 ---
 
-#### [POST] /topic
+### [POST] /topic
 
 **説明**
 
@@ -87,7 +97,7 @@ body:  <String> 通知本文
 
 ---
 
-#### [POST] /subscribe
+### [POST] /subscribe
 
 **説明**
 
