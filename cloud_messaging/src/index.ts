@@ -1,7 +1,6 @@
 import express from 'express';
 import { SendMessage } from './module/send_message';
 import { AuthenticationService } from './module/service/firebase/authentication_service';
-import { CloudMessagingService } from './module/service/firebase/cloud_messaging_service';
 
 const app = express();
 const port = 8080;
