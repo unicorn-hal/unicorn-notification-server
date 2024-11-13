@@ -1,5 +1,5 @@
 services:
-  cloud_messaging:
+  server:
     build: ./cloud_messaging/.
     ports:
       - "8080:8080"
