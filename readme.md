@@ -5,7 +5,7 @@ Dockerコンテナで機能を分割して利用します。
 
 ## CloudMessaging
 
-Firebase Cloud Messegingを利用して、フロントエンドにプッシュ通知を提供するサーバーです。
+Firebase Cloud Messagingを利用して、フロントエンドにプッシュ通知を提供するサーバーです。
 
 ### コンテナスペック
 
@@ -15,15 +15,15 @@ Firebase Cloud Messegingを利用して、フロントエンドにプッシュ�
 
 ### API仕様 
 
-最終更新: 2024/10/24
+最終更新: 2024/11/13
 
 #### [POST] /send
 
-**Explain**
+**説明**
 
 指定FCMTokenを持つ単体デバイスにメッセージを送信します。
 
-**Parameters**
+**パラメータ**
 
 body
 ```
@@ -32,7 +32,7 @@ title: <String> 通知タイトル
 body:  <String> 通知本文
 ```
 
-**Response**
+**レスポンス**
 
 **200** : Success
 
@@ -44,11 +44,11 @@ body:  <String> 通知本文
 
 #### [POST] /multicast
 
-**Explain**
+**説明**
 
 指定FCMTokenを持つ複数デバイスにメッセージを送信します。
 
-**Parameters**
+**パラメータ**
 
 body
 ```
@@ -57,7 +57,7 @@ title:  <String>   通知タイトル
 body:   <String>   通知本文
 ```
 
-**Response**
+**レスポンス**
 
 **200** : Success
 
@@ -69,11 +69,11 @@ body:   <String>   通知本文
 
 #### [POST] /topic
 
-**Explain**
+**説明**
 
 指定トピックを購読しているすべてのデバイスにメッセージを送信します。
 
-**Parameters**
+**パラメータ**
 
 body
 ```
@@ -82,7 +82,7 @@ title: <String> 通知タイトル
 body:  <String> 通知本文
 ```
 
-**Response**
+**レスポンス**
 
 **200** : Success
 
@@ -94,11 +94,11 @@ body:  <String> 通知本文
 
 #### [POST] /subscribe
 
-**Explain**
+**説明**
 
 指定FCMTokenを持つデバイスに指定トピックを購読します。
 
-**Parameters**
+**パラメータ**
 
 body
 ```
@@ -106,26 +106,12 @@ tokens: <String[]> デバイスから発行されるFCMToken配列
 topic:  <String>   トピック名
 ```
 
-**Response**
+**レスポンス**
 
 **200** : Success
+
+**400** : Invalid tokens (トークン未設定)
 
 **400** : Invalid topic (未定義のトピック)
-
-**500** : Internal Server Error
-
----
-
-#### [GET] /subscribe/topic
-
-**Explain**
-
-購読可能なトピックの配列を取得します。
-
-**Response**
-
-**200** : Success
-
-**404** : No topics found (トピック購読不可)
 
 **500** : Internal Server Error

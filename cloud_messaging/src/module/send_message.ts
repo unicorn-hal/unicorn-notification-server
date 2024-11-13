@@ -62,7 +62,7 @@ export class SendMessage {
         const topic = this.req.body.topic as string;
         console.log('Topic:', topic);
 
-        if (!this.cloudMessagingService.topics.includes(topic)) {
+        if (!topic) {
             this.res.status(400).send('Invalid topic');
             return;
         }
@@ -84,7 +84,12 @@ export class SendMessage {
         console.log('Tokens:', tokens);
         console.log('Topic:', topic);
 
-        if (!this.cloudMessagingService.topics.includes(topic)) {
+        if (!tokens || tokens.length === 0) {
+            this.res.status(400).send('Invalid tokens');
+            return;
+        }
+
+        if (!topic) {
             this.res.status(400).send('Invalid topic');
             return;
         }

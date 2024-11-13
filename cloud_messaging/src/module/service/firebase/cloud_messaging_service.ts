@@ -2,14 +2,6 @@ import { getMessaging } from "firebase-admin/messaging";
 import { FirebaseCore } from "../core/firebase_core";
 
 export class CloudMessagingService extends FirebaseCore {
-    get topics(): string[] {
-        return [
-            'all',
-            'user',
-            'doctor',
-        ]
-    }
-
     async send(title: string, body: string, token: string) {
         const message = {
             notification: {
