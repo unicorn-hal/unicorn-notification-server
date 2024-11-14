@@ -18,16 +18,16 @@ app.use((_, res, next) => {
 
 app.use(async (req, res, next) => {
     // Check Bearer token
-    const bearerHeader = req.headers['authorization'];
-    if (!bearerHeader) {
-        res.status(403).send('Forbidden');
-        return;
-    }
-
-    const bearer = bearerHeader.split(' ');
-    const bearerToken = bearer[1];
-    const authService = new AuthenticationService();
     try {
+        const bearerHeader = req.headers['authorization'];
+        if (!bearerHeader) {
+            res.status(403).send('Forbidden');
+            return;
+        }
+        const bearer = bearerHeader.split(' ');
+        const bearerToken = bearer[1];
+        const authService = new AuthenticationService();
+
         await authService.verifyIdToken(bearerToken);
         next();
     } catch (error) {
