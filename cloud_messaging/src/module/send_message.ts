@@ -101,4 +101,31 @@ export class SendMessage {
             this.res.status(500).send(error);
         }
     }
+
+    /**
+     * Unsubscribe a device from a topic.
+     */
+    async unsubscribeFromTopic() {
+        const tokens = this.req.body.tokens as string[];
+        const topic = this.req.body.topic as string;
+        console.log('Tokens:', tokens);
+        console.log('Topic:', topic);
+
+        if (!tokens || tokens.length === 0) {
+            this.res.status(400).send('Invalid tokens');
+            return;
+        }
+
+        if (!topic) {
+            this.res.status(400).send('Invalid topic');
+            return;
+        }
+
+        try {
+            const res = await this.cloudMessagingService.unsubscribeFromTopic(tokens, topic);
+            this.res.status(200).send(res);
+        } catch (error) {
+            this.res.status(500).send(error);
+        }
+    }
 }

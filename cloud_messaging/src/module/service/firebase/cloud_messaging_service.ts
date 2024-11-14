@@ -77,4 +77,17 @@ export class CloudMessagingService extends FirebaseCore {
             throw error;
         }
     }
+
+    async unsubscribeFromTopic(tokens: string[], topic: string) {
+        console.log('Unsubscribing from topic...');
+
+        try {
+            const res = await getMessaging().unsubscribeFromTopic(tokens, topic);
+            console.log('Successfully unsubscribed from topic:', res);
+            return res;
+        } catch (error) {
+            console.error('Error unsubscribing from topic:', error);
+            throw error;
+        }
+    }
 }

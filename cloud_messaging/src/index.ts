@@ -54,6 +54,10 @@ app.post('/subscribe', async (req, res) => {
     const sendMessage = new SendMessage(req, res);
     await sendMessage.subscribeToTopic();
 });
+app.post('/unsubscribe', async (req, res) => {
+    const sendMessage = new SendMessage(req, res);
+    await sendMessage.unsubscribeFromTopic();
+});
 
 app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
