@@ -120,3 +120,29 @@ topic:  <String>   トピック名
 **400** : Invalid topic (未定義のトピック)
 
 **500** : Internal Server Error
+
+---
+
+### [POST] /unsubscribe
+
+**説明**
+
+指定FCMTokenを持つデバイスの指定トピック購読を解除します。
+
+**パラメータ**
+
+body
+```
+tokens: <String[]> デバイスから発行されるFCMToken配列
+topic:  <String>   トピック名
+```
+
+**レスポンス**
+
+**200** : Success
+
+**400** : Invalid tokens (トークン未設定)
+
+**400** : Invalid topic (未定義のトピック)
+
+**500** : Internal Server Error
