@@ -1,14 +1,14 @@
 {
-  "name": "messaging-stab",
+  "name": "unicorn-notification-server",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "build": "tsc -p .",
-    "docker:build:cloud": "docker build --platform linux/amd64 -t gcr.io/unicorn-hal/messaging-stab .",
-    "docker:push": "docker push gcr.io/unicorn-hal/messaging-stab",
+    "docker:build:cloud": "docker build --platform linux/amd64 -t gcr.io/unicorn-hal/unicorn-notification-server .",
+    "docker:push": "docker push gcr.io/unicorn-hal/unicorn-notification-server",
     "gcloud:config": "gcloud config set project unicorn-hal && gcloud auth configure-docker && gcloud auth configure-docker asia-northeast1-docker.pkg.dev",
     "gcloud:activate": "gcloud auth activate-service-account --key-file ./scripts/utils/runner.json && gcloud config set account runner@unicorn-hal.iam.gserviceaccount.com && gcloud auth list",
-    "gcloud:deploy": "gcloud run deploy messaging-stab --image gcr.io/unicorn-hal/messaging-stab --platform managed --region asia-northeast1 --allow-unauthenticated",
+    "gcloud:deploy": "gcloud run deploy unicorn-notification-server --image gcr.io/unicorn-hal/unicorn-notification-server --platform managed --region asia-northeast1 --allow-unauthenticated",
     "auth": "npm run gcloud:config && npm run gcloud:activate",
     "deploy": "npm run build && npm run docker:build:cloud && npm run docker:push && npm run gcloud:deploy"
   },

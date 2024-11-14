@@ -1,6 +1,6 @@
 import express from 'express';
 import { SendMessage } from './module/send_message';
-import { CloudMessagingService } from './module/service/firebase/cloud_messaging_service';
+import { AuthenticationService } from './module/service/firebase/authentication_service';
 
 const app = express();
 const port = 8080;
@@ -11,13 +11,32 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware
 app.use((_, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.header("Access-Control-Allow-Methods", "GET, POST");
     next();
 });
 
+app.use(async (req, res, next) => {
+    // Check Bearer token
+    const bearerHeader = req.headers['authorization'];
+    if (!bearerHeader) {
+        res.status(403).send('Forbidden');
+        return;
+    }
+
+    const bearer = bearerHeader.split(' ');
+    const bearerToken = bearer[1];
+    const authService = new AuthenticationService();
+    try {
+        await authService.verifyIdToken(bearerToken);
+        next();
+    } catch (error) {
+        res.status(403).send('Forbidden');
+    }
+});
+
 app.get('/', (_, res) => {
-    res.send('Hello World!');
+    res.status(200).send('Hello World!');
 });
 app.post('/send', async (req, res) => {
     const sendMessage = new SendMessage(req, res);
@@ -34,19 +53,6 @@ app.post('/topic', async (req, res) => {
 app.post('/subscribe', async (req, res) => {
     const sendMessage = new SendMessage(req, res);
     await sendMessage.subscribeToTopic();
-});
-app.get('/subscribe/topic', async (_, res) => {
-    try {
-        const messgagingService = new CloudMessagingService();
-        const topics = messgagingService.topics;
-        if (!topics) {
-            res.status(404).send({ message: 'No topics found' });
-            return;
-        }
-        res.status(200).send({ data: topics });
-    } catch (error) {
-        res.status(500).send({ error });
-    }
 });
 
 app.listen(port, () => {

@@ -1,29 +1,34 @@
-# Unicornテスト用サーバー
+# Unicorn Notification Server
 
-フロントエンド実装で利用する機能のテストを行うためのリポジトリです。
-Dockerコンテナで機能を分割して利用します。
+Firebase Cloud Messagingを利用して、フロントエンドにプッシュ通知を提供するサーバーです。
 
-## CloudMessaging
-
-Firebase Cloud Messegingを利用して、フロントエンドにプッシュ通知を提供するサーバーです。
-
-### コンテナスペック
+## コンテナスペック
 
 - Node.js v18.20.3
 - TypeScript v5.6.3
 - Express.js v4.21.1
 
-### API仕様 
+## API仕様 
 
-最終更新: 2024/10/24
+最終更新: 2024/11/14
 
-#### [POST] /send
+### 共通Header
+```
+Content-Type:  application/json
+Authorization: Bearer YOUR_ID_TOKEN
+```
+Authorizationに指定するTokenはFirebase認証を通過する必要があります。
+認証を通過していないTokenには`403 Forbidden`を返却します。
 
-**Explain**
+---
+
+### [POST] /send
+
+**説明**
 
 指定FCMTokenを持つ単体デバイスにメッセージを送信します。
 
-**Parameters**
+**パラメータ**
 
 body
 ```
@@ -32,7 +37,7 @@ title: <String> 通知タイトル
 body:  <String> 通知本文
 ```
 
-**Response**
+**レスポンス**
 
 **200** : Success
 
@@ -42,13 +47,13 @@ body:  <String> 通知本文
 
 ---
 
-#### [POST] /multicast
+### [POST] /multicast
 
-**Explain**
+**説明**
 
 指定FCMTokenを持つ複数デバイスにメッセージを送信します。
 
-**Parameters**
+**パラメータ**
 
 body
 ```
@@ -57,7 +62,7 @@ title:  <String>   通知タイトル
 body:   <String>   通知本文
 ```
 
-**Response**
+**レスポンス**
 
 **200** : Success
 
@@ -67,13 +72,13 @@ body:   <String>   通知本文
 
 ---
 
-#### [POST] /topic
+### [POST] /topic
 
-**Explain**
+**説明**
 
 指定トピックを購読しているすべてのデバイスにメッセージを送信します。
 
-**Parameters**
+**パラメータ**
 
 body
 ```
@@ -82,7 +87,7 @@ title: <String> 通知タイトル
 body:  <String> 通知本文
 ```
 
-**Response**
+**レスポンス**
 
 **200** : Success
 
@@ -92,13 +97,13 @@ body:  <String> 通知本文
 
 ---
 
-#### [POST] /subscribe
+### [POST] /subscribe
 
-**Explain**
+**説明**
 
 指定FCMTokenを持つデバイスに指定トピックを購読します。
 
-**Parameters**
+**パラメータ**
 
 body
 ```
@@ -106,26 +111,12 @@ tokens: <String[]> デバイスから発行されるFCMToken配列
 topic:  <String>   トピック名
 ```
 
-**Response**
+**レスポンス**
 
 **200** : Success
+
+**400** : Invalid tokens (トークン未設定)
 
 **400** : Invalid topic (未定義のトピック)
-
-**500** : Internal Server Error
-
----
-
-#### [GET] /subscribe/topic
-
-**Explain**
-
-購読可能なトピックの配列を取得します。
-
-**Response**
-
-**200** : Success
-
-**404** : No topics found (トピック購読不可)
 
 **500** : Internal Server Error
