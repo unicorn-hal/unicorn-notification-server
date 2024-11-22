@@ -1,148 +1,389 @@
-# Unicorn Notification Server
+# Cloud Messagingサーバー - API 仕様書
 
-Firebase Cloud Messagingを利用して、フロントエンドにプッシュ通知を提供するサーバーです。
-
-## コンテナスペック
-
-- Node.js v18.20.3
-- TypeScript v5.6.3
-- Express.js v4.21.1
-
-## API仕様 
-
-最終更新: 2024/11/14
-
-### 共通Header
-```
-Content-Type:  application/json
-Authorization: Bearer YOUR_ID_TOKEN
-```
-Authorizationに指定するTokenはFirebase認証を通過する必要があります。
-認証を通過していないTokenには`403 Forbidden`を返却します。
+このドキュメントでは、Firebase Cloud Messagingを使用したメッセージングAPIのエンドポイントと、Firebase認証について説明します。
 
 ---
 
-### [POST] /send
+## 認証
 
-**説明**
+このAPIを利用するには、すべてのリクエストにFirebase認証によるBearerトークンを含める必要があります。
 
-指定FCMTokenを持つ単体デバイスにメッセージを送信します。
+### 認証方法
 
-**パラメータ**
+- **ヘッダー**
 
-body
-```
-token: <String> デバイスから発行されるFCMToken
-title: <String> 通知タイトル
-body:  <String> 通知本文
-```
+  ```
+  Authorization: Bearer {Firebase IDトークン}
+  ```
 
-**レスポンス**
+- **Firebase IDトークンの取得方法**
 
-**200** : Success
+  クライアントアプリ（モバイルアプリやウェブアプリ）でユーザーが認証後に取得できるFirebase IDトークンを使用します。
 
-**400** : Invalid token (トークン未設定)
+- **注意事項**
 
-**500** : Internal Server Error
+  - トークンが無効または期限切れの場合、`403 Forbidden` エラーが返されます。
 
 ---
 
-### [POST] /multicast
+## エンドポイント一覧
 
-**説明**
-
-指定FCMTokenを持つ複数デバイスにメッセージを送信します。
-
-**パラメータ**
-
-body
-```
-tokens: <String[]> デバイスから発行されるFCMToken配列
-title:  <String>   通知タイトル
-body:   <String>   通知本文
-```
-
-**レスポンス**
-
-**200** : Success
-
-**400** : Invalid tokens (トークン未設定)
-
-**500** : Internal Server Error
+- POST /send
+- POST /multicast
+- POST /topic
+- POST /subscribe
+- POST /unsubscribe
 
 ---
 
-### [POST] /topic
+## POST /send
 
-**説明**
+指定したデバイス（FCMトークン）に通知メッセージを送信します。
 
-指定トピックを購読しているすべてのデバイスにメッセージを送信します。
+### 認証
 
-**パラメータ**
+このエンドポイントは認証が必要です。
 
-body
-```
-topic: <String> トピック名
-title: <String> 通知タイトル
-body:  <String> 通知本文
-```
+### リクエスト
 
-**レスポンス**
+- **ヘッダー**
 
-**200** : Success
+  ```
+  Content-Type: application/json
+  Authorization: Bearer {Firebase IDトークン}
+  ```
 
-**400** : Invalid topic (未定義のトピック)
+- **ボディ**
 
-**500** : Internal Server Error
+  ```json
+  {
+    "title": "string",
+    "body": "string",
+    "token": "string"
+  }
+  ```
+
+  - `title`: メッセージのタイトル。
+  - `body`: メッセージの本文。
+  - `token`: 送信先デバイスのFCMトークン。
+
+### レスポンス
+
+- **成功時（200 OK）**
+
+  ```json
+  {
+    "name": "string"
+  }
+  ```
+
+  - 
+
+name
+
+: メッセージの一意識別子。
+
+- **エラー時**
+
+  - `400 Bad Request`: 無効なリクエストデータ（例：トークンが未指定）。
+  - `403 Forbidden`: 認証に失敗した場合（無効なまたは欠落したトークン）。
+  - `500 Internal Server Error`: サーバー内部でエラーが発生した場合。
 
 ---
 
-### [POST] /subscribe
+## POST /multicast
 
-**説明**
+複数のデバイス（複数のFCMトークン）に通知メッセージを送信します。
 
-指定FCMTokenを持つデバイスに指定トピックを購読します。
+### 認証
 
-**パラメータ**
+このエンドポイントは認証が必要です。
 
-body
-```
-tokens: <String[]> デバイスから発行されるFCMToken配列
-topic:  <String>   トピック名
-```
+### リクエスト
 
-**レスポンス**
+- **ヘッダー**
 
-**200** : Success
+  ```
+  Content-Type: application/json
+  Authorization: Bearer {Firebase IDトークン}
+  ```
 
-**400** : Invalid tokens (トークン未設定)
+- **ボディ**
 
-**400** : Invalid topic (未定義のトピック)
+  ```json
+  {
+    "title": "string",
+    "body": "string",
+    "tokens": ["string"]
+  }
+  ```
 
-**500** : Internal Server Error
+  - `title`: メッセージのタイトル。
+  - `body`: メッセージの本文。
+  - `tokens`: 送信先デバイスのFCMトークンの配列。
+
+### レスポンス
+
+- **成功時（200 OK）**
+
+  ```json
+  {
+    "responses": [
+      {
+        "success": true,
+        "messageId": "string"
+      },
+      {
+        "success": false,
+        "error": {
+          "code": "string",
+          "message": "string"
+        }
+      }
+    ],
+    "successCount": number,
+    "failureCount": number
+  }
+  ```
+
+  - `responses`: 各トークンへのメッセージ送信結果の配列。
+    - `success`: メッセージの送信が成功したかどうか。
+    - `messageId`: メッセージの一意識別子（成功時）。
+    - 
+
+error
+
+: エラー情報（失敗時）。
+      - `code`: エラーコード。
+      - `message`: エラーメッセージ。
+  - `successCount`: 送信に成功したトークンの数。
+  - `failureCount`: 送信に失敗したトークンの数。
+
+- **エラー時**
+
+  - `400 Bad Request`: 無効なリクエストデータ（例：トークンが未指定）。
+  - `403 Forbidden`: 認証に失敗した場合。
+  - `500 Internal Server Error`: サーバー内部でエラーが発生した場合。
 
 ---
 
-### [POST] /unsubscribe
+## POST /topic
 
-**説明**
+指定したトピックに通知メッセージを送信します。
 
-指定FCMTokenを持つデバイスの指定トピック購読を解除します。
+### 認証
 
-**パラメータ**
+このエンドポイントは認証が必要です。
 
-body
-```
-tokens: <String[]> デバイスから発行されるFCMToken配列
-topic:  <String>   トピック名
-```
+### リクエスト
 
-**レスポンス**
+- **ヘッダー**
 
-**200** : Success
+  ```
+  Content-Type: application/json
+  Authorization: Bearer {Firebase IDトークン}
+  ```
 
-**400** : Invalid tokens (トークン未設定)
+- **ボディ**
 
-**400** : Invalid topic (未定義のトピック)
+  ```json
+  {
+    "title": "string",
+    "body": "string",
+    "topic": "string"
+  }
+  ```
 
-**500** : Internal Server Error
+  - `title`: メッセージのタイトル。
+  - `body`: メッセージの本文。
+  - `topic`: メッセージを送信するトピック名。
+
+### レスポンス
+
+- **成功時（200 OK）**
+
+  ```json
+  {
+    "messageId": "string"
+  }
+  ```
+
+  - `messageId`: メッセージの一意識別子。
+
+- **エラー時**
+
+  - `400 Bad Request`: 無効なトピックが指定された場合。
+  - `403 Forbidden`: 認証に失敗した場合。
+  - `500 Internal Server Error`: サーバー内部でエラーが発生した場合。
+
+---
+
+## POST /subscribe
+
+デバイス（FCMトークン）を指定したトピックに登録します。
+
+### 認証
+
+このエンドポイントは認証が必要です。
+
+### リクエスト
+
+- **ヘッダー**
+
+  ```
+  Content-Type: application/json
+  Authorization: Bearer {Firebase IDトークン}
+  ```
+
+- **ボディ**
+
+  ```json
+  {
+    "tokens": ["string"],
+    "topic": "string"
+  }
+  ```
+
+  - `tokens`: 登録するデバイスのFCMトークンの配列。
+  - `topic`: 登録するトピック名。
+
+### レスポンス
+
+- **成功時（200 OK）**
+
+  ```json
+  {
+    "successCount": number,
+    "failureCount": number,
+    "errors": [
+      {
+        "index": number,
+        "reason": "string",
+        "message": "string"
+      }
+    ]
+  }
+  ```
+
+  - `successCount`: 登録に成功したトークンの数。
+  - `failureCount`: 登録に失敗したトークンの数。
+  - `errors`: エラー情報の配列。
+    - `index`: エラーが発生したトークンのインデックス。
+    - `reason`: エラー理由。
+    - `message`: エラーメッセージ。
+
+- **エラー時**
+
+  - `400 Bad Request`: 無効なトピックまたはトークンが指定された場合。
+  - `403 Forbidden`: 認証に失敗した場合。
+  - `500 Internal Server Error`: サーバー内部でエラーが発生した場合。
+
+---
+
+## POST /unsubscribe
+
+デバイス（FCMトークン）を指定したトピックから解除します。
+
+### 認証
+
+このエンドポイントは認証が必要です。
+
+### リクエスト
+
+- **ヘッダー**
+
+  ```
+  Content-Type: application/json
+  Authorization: Bearer {Firebase IDトークン}
+  ```
+
+- **ボディ**
+
+  ```json
+  {
+    "tokens": ["string"],
+    "topic": "string"
+  }
+  ```
+
+  - `tokens`: 解除するデバイスのFCMトークンの配列。
+  - `topic`: 解除するトピック名。
+
+### レスポンス
+
+- **成功時（200 OK）**
+
+  ```json
+  {
+    "successCount": number,
+    "failureCount": number,
+    "errors": [
+      {
+        "index": number,
+        "reason": "string",
+        "message": "string"
+      }
+    ]
+  }
+  ```
+
+  - `successCount`: 解除に成功したトークンの数。
+  - `failureCount`: 解除に失敗したトークンの数。
+  - `errors`: エラー情報の配列。
+    - `index`: エラーが発生したトークンのインデックス。
+    - `reason`: エラー理由。
+    - `message`: エラーメッセージ。
+
+- **エラー時**
+
+  - `400 Bad Request`: 無効なトピックまたはトークンが指定された場合。
+  - `403 Forbidden`: 認証に失敗した場合。
+  - `500 Internal Server Error`: サーバー内部でエラーが発生した場合。
+
+---
+
+## 共通エラーレスポンス
+
+- **400 Bad Request**
+
+  ```json
+  {
+    "error": {
+      "code": "invalid-argument",
+      "message": "Invalid request data"
+    }
+  }
+  ```
+
+- **403 Forbidden**
+
+  ```json
+  {
+    "error": {
+      "code": "unauthorized",
+      "message": "Authentication failed"
+    }
+  }
+  ```
+
+- **500 Internal Server Error**
+
+  ```json
+  {
+    "error": {
+      "code": "internal",
+      "message": "Internal server error"
+    }
+  }
+  ```
+
+---
+
+## 注意事項
+
+- すべてのリクエストは `Content-Type: application/json` と `Authorization: Bearer {Firebase IDトークン}` ヘッダーを含める必要があります。
+- トピック名には英数字とアンダースコアのみ使用可能です。
+- Firebase IDトークンはFirebase Authenticationを使用してクライアント側で取得してください。
+- レスポンスの詳細はFirebase Admin SDKのMessagingモジュールに準拠しています。
+
+---
